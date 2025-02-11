@@ -3,4 +3,4 @@ title: "index"
 format: html
 editor: visual
 ---
-Link for my repository: https://github.com/LoatileLebala/Practical_submission_1/tree/master
+Link for my repository: https://github.com/LoatileLebala/Practical_submission_1.git
