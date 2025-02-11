@@ -1,0 +1,111 @@
+---
+title: "Quarto1"
+format: html
+editor: visual
+---
+
+#Question 1
+
+The airquality dataset was used to answer Question 1
+
+The function any(is.na()) returns a logical vector where TRUE indicates a row with missing values and FALSE indicates a row with no missing values
+
+```{r}
+
+#| echo: TRUE
+head(airquality)
+df = airquality
+df
+rows <- apply(df, 1, function(x) any(is.na(x))) 
+
+c(paste0(sum(rows), " rows having missing values"))
+
+missing_rows <- which(rows)
+c(paste0(" Row ", missing_rows," is a row that has missing values"))
+#The margin 1 indicates that we are trying to find rows
+#any(is.na) is a function to find the missing rows in our dataset
+```
+
+#Question 2
+
+We now find relevant statistics for each of the temperature and ozone levels and we utilize the summary() function to generate said results
+
+```{r}
+
+#| echo: TRUE
+names(airquality) #The variables in our dataset
+
+
+summary_stats_temp <- summary(airquality$Temp, na.rm = TRUE)
+summary_stats_temp #contains the min,max and mean for temperature
+sd_temp <- sd(airquality$Temp, na.rm = TRUE)
+
+
+summary_stats_ozone <- summary(airquality$Ozone, na.rm = TRUE)
+summary_stats_ozone #contains the min, max and mean for ozone
+sd_ozone <- sd(airquality$Ozone, na.rm = TRUE)
+
+```
+
+#Question 3
+
+This question concerns a linear regression regarding the dataset cars. The speed variable is the explanatory variable while the distance to stop variable is the response variable. We will also calculate the standard error, t-test statistic and p-values using first principles
+
+```{r}
+
+#| echo: TRUE
+data(cars)
+cars
+head(cars)
+X <- cbind(1, cars$speed) #The design matrix
+Y <- cars$dist #Response variable 
+beta_hat <- solve(t(X) %*% X) %*% t(X) %*% Y
+beta_hat
+
+BetaEstimates <- c(paste0("The estimate of the intercept is ", -17.579095, " and the estimate of the slope of speed is ", 3.932409))
+BetaEstimates
+residuals_error <- Y - X %*% beta_hat #conformable
+RSS <- sum(residuals_error^2)
+RSS
+
+
+n <- length(Y) #The number of datapoints
+p <- ncol(X) #2 predictors because of the design matrix 
+MSE <- RSS/(n-2)
+MSE
+
+SXX <- sum((cars$speed - mean(cars$speed))^2)
+standard_error_intercept <- sqrt(MSE * (1/n + (cars$speed)^2/SXX))
+standard_error_intercept
+
+standard_error_beta1 <- sqrt((RSS/(n-2))/sqrt(SXX))
+standard_error_beta1
+
+t_stat_intercept <- -17.579095/standard_error_intercept
+
+t_stat_slopeSpeed <- 3.932409/standard_error_beta1
+
+degrees_freedom <- n-2
+degrees_freedom
+
+p_intercept <- 2 * (1 - pt(abs(t_stat_intercept),degrees_freedom))
+
+p_slope <- 2 * (1 - pt(abs(t_stat_slopeSpeed), degrees_freedom))
+
+p_intercept
+p_slope
+
+```
+
+#Question 4
+
+We now use the lm function to check if we get the same Beta hat estimates as the calculations above
+
+```{r}
+
+#| echo: TRUE
+data(cars)
+m1 <- lm(dist ~ speed, data = cars)
+m1
+summary(m1)
+```

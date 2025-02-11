@@ -1,0 +1,17 @@
+project:
+  title: "Practical Submission 1"
+  type: book
+  output-dir: _book
+
+book:
+  title: "Practicals"
+  chapters:
+    - index.qmd
+    - Practical1.qmd
+    - Practical2.qmd
+    - Practical4.qmd
+    
+format: 
+  html:
+    code_fold: true
+    

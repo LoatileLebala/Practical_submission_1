@@ -1,0 +1,101 @@
+---
+title: "Practical2"
+format: html
+editor: visual
+---
+
+1.  Generate Simulated Data:
+
+    So our first step is to create the the sequence of x's and then generate y as a noisy sine wave provided the given parameters.
+
+```{r}
+
+#| echo: TRUE
+set.seed(1)
+
+x <- 1:100
+
+y_true <- sin(x / 10) #the noisy sine wave 
+y_true
+
+y <- y_true + rnorm(100, 0, 0.2)  #mean 0 and sd 0.2
+y
+
+```
+
+2.  Implement the LOWESS Algorithm
+
+    Our 2nd step is to create the customLowess function that returns the smoothed values
+
+```{r}
+
+#| echo: TRUE
+customLowess <- function(x, y, f ) {
+  n <- length(x)
+  k <- floor(f * n)  
+  y_smooth <- numeric(n) #avoids funny behaviour 
+  
+  for (i in 1:n) {
+    
+    dist <- abs(x - x[i])
+    nearest_neighbors <- order(dist)[2:(k+1)]  #we start from 2 because x[1] would calculate the distance to itself which would just give you 0 and hence we make it k+1 
+    
+    dist_neighbors <- dist[nearest_neighbors]
+    
+    weights <- (1 - (dist_neighbors / max(dist_neighbors))^3)^3
+    
+    
+    X <- cbind(1, x[nearest_neighbors])
+    W <- diag(weights)
+    y_neighbors <- y[nearest_neighbors]
+    
+    beta <- solve(t(X) %*% W %*% X) %*% t(X) %*% W %*% y_neighbors  
+    
+    y_smooth[i] <- sum(c(1, x[i]) * beta) #uses the dot product effectively 
+  }
+  return(y_smooth)
+}
+y_smooth_custom <- customLowess(x, y, f = 0.2)
+y_smooth_custom
+
+data_plot1 <- cbind(x, y_smooth_custom)
+data_plot1
+```
+
+3.  Compare our results with R's built-in lowess() function.
+
+```{r}
+
+#| echo: TRUE
+lowess_result <- lowess(x, y, f = 0.2)
+data_plot2 <- as.data.frame(lowess_result)
+data_plot2
+```
+
+\
+4. Plot both curves to compare their smoothing values.
+
+The first curve is generated from the data points retrieved from the customLowess() I made.
+
+```{r}
+
+#| echo: TRUE
+library(ggplot2)
+
+ggplot(data = data_plot1, aes(x = x, y = y_smooth_custom )) + geom_line() + labs(title = "Plot displaying custom lowess function",x = "x values", y = "smoothed values")
+
+
+```
+
+The 2nd curve uses the results from the lowess() function in R
+
+```{r}
+
+#| echo: TRUE
+library(ggplot2)
+
+ggplot(data = data_plot2, aes(x = x,y = y )) + 
+  geom_line() + 
+  labs(title = "Plot displaying lowess function", x = "x values", y = "smoothed values")
+
+```
